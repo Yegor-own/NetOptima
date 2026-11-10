@@ -33,11 +33,7 @@ class OptimizationService:
         if not nodes or not links or not demands:
             raise ValueError("Недостаточно данных для расчета")
 
-        # result = self.solver.solve(nodes, links, demands, params)
-        try:
-            result = self.solver.solve(nodes, links, demands, params)
-        except Exception as e:
-            return e
+        result = self.solver.solve(nodes, links, demands, params)
 
         self.result_repo.clear_previous_results()
         self.result_repo.save_optimization_result(result)

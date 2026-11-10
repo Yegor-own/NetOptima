@@ -71,14 +71,21 @@ def create_model(nodes, links, demands, params):
 
     def flow_balance_rule(m, d, n):
 
-        inflow = sum(m.x[d, e] for e in m.E if edge_to[e] == n)
-        outflow = sum(m.x[d, e] for e in m.E if edge_from[e] == n)
+        in_edges = [e for e in m.E if edge_to[e] == n]
+        out_edges = [e for e in m.E if edge_from[e] == n]
+
+        inflow = sum(m.x[d, e] for e in in_edges)
+        outflow = sum(m.x[d, e] for e in out_edges)
 
         if n == demand_map[d].source_node_id:
             return outflow - inflow == m.h[d]
         elif n == demand_map[d].dest_node_id:
             return outflow - inflow == -m.h[d]
         else:
+
+            if not in_edges and not out_edges:
+                return Constraint.Skip # Пропускаем ограничение для изолированного узла
+            
             return outflow - inflow == 0
 
     model.flow_balance = Constraint(model.D, model.N, rule=flow_balance_rule)
