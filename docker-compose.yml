@@ -1,33 +1,44 @@
-volumes:
-  pg_data:
-  # Новый volume — для статических файлов
-  static:
 
 services:
   db:
     image: postgis/postgis:15-3.3
     container_name: net_db
-    env_file: .env
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+
   backend:
-    build: ./backend/
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
     container_name: net_back
+    restart: unless-stopped
     env_file: .env
-    # Тут подключаем volume к backend
-    volumes:
-      - static:/backend_static
-  frontend:
-    env_file: .env
-    build: ./frontend/
-    container_name: net_front
-    volumes:
-      - static:/frontend_static
-    command: cp -r /app/build/. /frontend_static/
-  gateway:
-    build: ./gateway/
-    # А тут подключаем volume со статикой к gateway
-    volumes:
-      - static:/staticfiles/
     ports:
-      - 8000:80
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: net_front
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+
+# ВОТ ЭТОТ БЛОК ОБЯЗАТЕЛЕН В КОНЦЕ:
+volumes:
+  pg_data:

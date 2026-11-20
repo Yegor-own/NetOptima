@@ -8,12 +8,12 @@ from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 DATABASE_URL = URL.create(
-    drivername=os.getenv("DB_DRIVER"),
-    username=os.getenv("USERNAME"),
-    password=os.getenv("PASSWORD"),
-    host=os.getenv("HOST"),
-    port=os.getenv("PORT"),
-    database=os.getenv("DB_NAME"),
+    drivername=os.getenv("DB_DRIVER", "postgresql"),
+    username=os.getenv("DB_USER", os.getenv("POSTGRES_USER", "root")),
+    password=os.getenv("DB_PASSWORD", os.getenv("POSTGRES_PASSWORD", "password")),
+    host=os.getenv("DB_HOST", "localhost"),
+    port=int(os.getenv("DB_PORT", 5432)),
+    database=os.getenv("DB_NAME", os.getenv("POSTGRES_DB", "network_design")),
 )
 
 engine = create_engine(DATABASE_URL, echo=True)
