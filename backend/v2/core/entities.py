@@ -62,6 +62,8 @@ class FlowAssignment:
     id: int
     demand_id: int
     link_id: int
+    from_node_id: int
+    to_node_id: int
     flow_value: float
 
 @dataclass

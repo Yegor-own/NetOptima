@@ -22,6 +22,8 @@ class PyomoNetworkSolver(INetworkSolver):
         if str(status) != "optimal":
             raise Exception(f"Solver failed: {status}")
 
+        link_map = {l.id: l for l in links}
+        
         links_results = []
 
         for e in model.E:
@@ -34,19 +36,39 @@ class PyomoNetworkSolver(INetworkSolver):
                         link_id=int(e),
                         capacity=float(u_val)
                     ))
-        flows = []
 
+        flows = []
         for d in model.D:
             for e in model.E:
-                val = model.x[d, e].value
+                link_obj = link_map[int(e)]
 
-                if val is not None and val > 1e-6:
-                    flows.append( FlowAssignment(
-                        id=0,
-                        demand_id=int(d),
-                        link_id=int(e),
-                        flow_value=float(val)
-                    ))
+                # Прямой поток: source_node -> dest_node
+                fwd_val = model.x_fwd[d, e].value
+                if fwd_val is not None and fwd_val > 1e-6:
+                    flows.append(
+                        FlowAssignment(
+                            id=0,
+                            demand_id=int(d),
+                            link_id=int(e),
+                            from_node_id=link_obj.source_node_id,
+                            to_node_id=link_obj.dest_node_id,
+                            flow_value=float(fwd_val)
+                        )
+                    )
+
+                # Обратный поток: dest_node -> source_node
+                bwd_val = model.x_bwd[d, e].value
+                if bwd_val is not None and bwd_val > 1e-6:
+                    flows.append(
+                        FlowAssignment(
+                            id=0,
+                            demand_id=int(d),
+                            link_id=int(e),
+                            from_node_id=link_obj.dest_node_id,
+                            to_node_id=link_obj.source_node_id,
+                            flow_value=float(bwd_val)
+                        )
+                    )
 
         return SolverResult(
             links=links_results,

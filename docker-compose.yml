@@ -12,33 +12,24 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
   backend:
     build:
       context: .
       dockerfile: ./backend/Dockerfile
-    container_name: net_back
+    container_name: net_backend
     restart: unless-stopped
     env_file: .env
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: net_front
-    restart: unless-stopped
-    env_file: .env
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend/src:/app/src
-    depends_on:
-      - backend
-
-# ВОТ ЭТОТ БЛОК ОБЯЗАТЕЛЕН В КОНЦЕ:
 volumes:
   pg_data:

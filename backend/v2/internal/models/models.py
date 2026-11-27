@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 from geoalchemy2.elements import WKTElement
@@ -70,7 +71,11 @@ class FlowAssignment(Base):
     id = Column(Integer, primary_key=True, index=True)
     demand_id = Column(Integer, ForeignKey("demands.id"), nullable=False)
     link_id = Column(Integer, ForeignKey("candidate_links.id"), nullable=False)
+    from_node_id = Column(Integer, ForeignKey("nodes.id"), nullable=False)
+    to_node_id = Column(Integer, ForeignKey("nodes.id"), nullable=False)
+
     flow_value = Column(Float, default=0.0) # x_de
 
     demand = relationship("Demand", foreign_keys=[demand_id], back_populates="flows")
     link = relationship("CandidateLink", foreign_keys=[link_id], back_populates="flows")
+    

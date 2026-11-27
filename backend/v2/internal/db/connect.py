@@ -16,7 +16,7 @@ DATABASE_URL = URL.create(
     database=os.getenv("DB_NAME", os.getenv("POSTGRES_DB", "network_design")),
 )
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=True, plugins=["geoalchemy2"])
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

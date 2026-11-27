@@ -27,6 +27,8 @@ class SqlAlchemyResultRepository(IResultRepository):
             new_flow = FlowAssignmentModel(
                 demand_id=flow.demand_id,
                 link_id=flow.link_id,
+                from_node_id=flow.from_node_id,
+                to_node_id=flow.to_node_id,
                 flow_value=flow.flow_value
             )
             self.db.add(new_flow)
@@ -50,6 +52,8 @@ class SqlAlchemyResultRepository(IResultRepository):
                 id=f.id, 
                 demand_id=f.demand_id, 
                 link_id=f.link_id, 
+                from_node_id=f.from_node_id,
+                to_node_id=f.to_node_id,
                 flow_value=f.flow_value
             ) for f in results
         ]
