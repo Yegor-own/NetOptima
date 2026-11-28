@@ -30,6 +30,20 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  frontend:
+    build:
+      context: ./frontend/v2
+      dockerfile: Dockerfile
+    container_name: net_front
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/v2/src:/app/src
+    environment:
+      - VITE_API_URL=http://127.0.0.1:8000/api/v2
+    depends_on:
+      - backend
 
 volumes:
   pg_data:
